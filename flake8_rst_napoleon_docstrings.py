@@ -28,7 +28,9 @@ class Visitor(ast.NodeVisitor):
             # Line number, column offset, RST error
             for local_line_no, rst_error in rstcheck.check(parsed_docstring):
                 self.problems.append(
-                    (node.lineno, node.col_offset, "NAP001 " + rst_error))
+                    (node.lineno + local_line_no + 1,
+                     node.col_offset,
+                     "NAP001 " + rst_error))
 
         self.generic_visit(node)
 
@@ -42,7 +44,9 @@ class Visitor(ast.NodeVisitor):
             # Line number, column offset, RST error
             for local_line_no, rst_error in rstcheck.check(parsed_docstring):
                 self.problems.append(
-                    (node.lineno+local_line_no, node.col_offset, "NAP001 " + rst_error))
+                    (node.lineno + local_line_no + 1,
+                     node.col_offset,
+                     "NAP001 " + rst_error))
 
         self.generic_visit(node)
 
