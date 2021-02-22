@@ -64,11 +64,11 @@ class Visitor(ast.NodeVisitor):
 
             # Test that order matches
             if (set(func_arg_names.keys()) == set(param_names) and
-                     param_names != [arg.arg for arg in node.args.args]):
+                    param_names != [arg.arg for arg in node.args.args]):
                 self.problems.append(
                     (node.lineno + 1,  # Report error in docstring
                      node.col_offset,
-                     (f"NAP004 Parameter order does not match "
+                     ("NAP004 Parameter order does not match "
                          "docstring-defined order.")))
 
         self.generic_visit(node)
