@@ -26,8 +26,6 @@ class Visitor(ast.NodeVisitor):
         if docstring:
             parsed_docstring = GoogleDocstring(docstring).__str__()
 
-            print(parsed_docstring)
-
             # Line number, column offset, RST error
             for local_line_no, rst_error in rstcheck.check(parsed_docstring):
                 self.problems.append(
@@ -43,7 +41,13 @@ class Visitor(ast.NodeVisitor):
                 param_name = re.sub("^:param ", "", param_directive[:-1])
                 param_names.append(param_name)
 
-            func_arg_names = {arg.arg: arg for arg in node.args.args}
+            func_params = []
+            func_arg_names = {}
+            for arg_index, ast_arg in enumerate(node.args.args):
+                if ast_arg.arg == 'self':
+                    continue
+                func_params.append((ast_arg.arg, ast_arg))
+                func_arg_names[ast_arg.arg] = ast_arg
 
             # Verify the arguments match (names, order)
             for param_name in param_names:
@@ -64,12 +68,13 @@ class Visitor(ast.NodeVisitor):
 
             # Test that order matches
             if (set(func_arg_names.keys()) == set(param_names) and
-                    param_names != [arg.arg for arg in node.args.args]):
+                    param_names != list(func_arg_names.keys())):
                 self.problems.append(
                     (node.lineno + 1,  # Report error in docstring
                      node.col_offset,
                      ("NAP004 Parameter order does not match "
-                         "docstring-defined order.")))
+                         "docstring-defined order. "
+                         f"{list(func_arg_names.keys())} --- {param_names}")))
 
         self.generic_visit(node)
 
