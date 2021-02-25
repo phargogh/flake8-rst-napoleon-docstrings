@@ -33,49 +33,6 @@ class Visitor(ast.NodeVisitor):
                      node.col_offset,
                      "NAP001 " + rst_error))
 
-            # Check documented parameter names against the function signature
-            param_names = []
-            for param_directive in re.findall(
-                    ":param [a-zA-Z0-9_]+:", parsed_docstring):
-                # [:-1] trims off the trailing colon
-                param_name = re.sub("^:param ", "", param_directive[:-1])
-                param_names.append(param_name)
-
-            func_params = []
-            func_arg_names = {}
-            for arg_index, ast_arg in enumerate(node.args.args):
-                if ast_arg.arg == 'self':
-                    continue
-                func_params.append((ast_arg.arg, ast_arg))
-                func_arg_names[ast_arg.arg] = ast_arg
-
-            # Verify the arguments match (names, order)
-            for param_name in param_names:
-                if param_name not in func_arg_names:
-                    self.problems.append(
-                        (node.lineno + 1,  # Report error in docstring
-                         node.col_offset,
-                         f"NAP002 Arg '{param_name}' not in function signature."
-                         ))
-
-            for param_name in func_arg_names:
-                if param_name not in param_names:
-                    self.problems.append(
-                        (node.lineno + 1,  # Report error in docstring
-                         node.col_offset,
-                         (f"NAP003 Arg {param_name} not described in "
-                          "docstring.")))
-
-            # Test that order matches
-            if (set(func_arg_names.keys()) == set(param_names) and
-                    param_names != list(func_arg_names.keys())):
-                self.problems.append(
-                    (node.lineno + 1,  # Report error in docstring
-                     node.col_offset,
-                     ("NAP004 Parameter order does not match "
-                         "docstring-defined order. "
-                         f"{list(func_arg_names.keys())} --- {param_names}")))
-
         self.generic_visit(node)
 
     def visit_ClassDef(self, node: ast.ClassDef):

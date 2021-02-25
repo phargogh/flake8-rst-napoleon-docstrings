@@ -1,5 +1,5 @@
 def foo(a, b, c):
-    """Test test
+    """Test test.
 
     Args:
         a (int): Nope a
