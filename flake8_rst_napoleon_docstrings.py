@@ -24,7 +24,21 @@ class Visitor(ast.NodeVisitor):
         # textwrap.dedent, not to mention expanding tabs to spaces.
         docstring = ast.get_docstring(node, clean=True)
         if docstring:
+            original_line_numbers = {}
+            for line_no, line in enumerate(docstring.split('\n')):
+                original_line_numbers[line.strip()] = line_no
+
             parsed_docstring = GoogleDocstring(docstring).__str__()
+            print(parsed_docstring)
+
+            # TODO: How do I correctly map line numbers back to the original
+            # source?
+            parsed_line_numbers = {}
+            for line_no, line in enumerate(parsed_docstring.split('\n')):
+                line_without_directives = re.sub(
+                    '^:[a-zA-Z0-9_-]+:', '', line.strip())
+
+                parsed_line_numbers[line.strip()] = line_no
 
             # Line number, column offset, RST error
             for local_line_no, rst_error in rstcheck.check(parsed_docstring):
